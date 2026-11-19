@@ -318,11 +318,13 @@ function allowed(ip, max = 8, win = 60000) {
   list.push(now); _rl.set(ip, list); return true;
 }
 
+// ⚠️ CAMBIO: antes era http://ip-api.com (contenido mixto → aviso de permisos)
+// Ahora usa https://ipapi.co (HTTPS, sin aviso). Misma función: ciudad/país desde IP.
 async function obtenerUbicacionIP(ip) {
   try {
-    const r = await fetch(`http://ip-api.com/json/${ip}?lang=es`, { signal: AbortSignal.timeout(5000) });
+    const r = await fetch(`https://ipapi.co/${ip}/json/`, { signal: AbortSignal.timeout(5000) });
     const d = await r.json();
-    if (d && d.status === "success") return `${d.city}, ${d.regionName}, ${d.country}`;
+    if (d && !d.error) return `${d.city || "?"}, ${d.region || "?"}, ${d.country_name || "?"}`;
     return "Desconocida";
   } catch { return "Desconocida"; }
 }
