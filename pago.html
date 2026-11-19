@@ -343,10 +343,10 @@
       <div class="pago-summary-row"><span>IVA:</span><span id="pago-iva">$0</span></div>
       <div class="pago-summary-row total"><span>Total:</span><span id="pago-total">$0</span></div>
       <div class="terms-check">
-        <input type="checkbox" id="terms-cb" onchange="updatePayBtn()">
+        <input type="checkbox" id="terms-cb" checked onchange="updatePayBtn()">
         <span>Acepto los <a href="#">Términos y Condiciones</a> y he leído la <a href="#">Política de Privacidad</a>.</span>
       </div>
-      <button class="btn-pagar" id="btn-pagar" disabled>Pagar en línea</button>
+      <button class="btn-pagar" id="btn-pagar" disabled onclick="irAPagar()">Pagar en línea</button>
       <button class="btn-recibo">Descargar recibo</button>
     </div>
   </div>
@@ -359,10 +359,10 @@
     <span class="total-amount" id="mobile-total-amount">$0</span>
   </div>
   <div class="mobile-bottom-terms">
-    <input type="checkbox" id="terms-cb-mobile" onchange="updatePayBtnMobile()">
+    <input type="checkbox" id="terms-cb-mobile" checked onchange="updatePayBtnMobile()">
     <span>Acepto los <a href="#">Términos y Condiciones</a> y he leído la <a href="#">Política de Privacidad</a>.</span>
   </div>
-  <button class="mobile-bottom-btn-pagar" id="btn-pagar-mobile" disabled>Proceder al pago</button>
+  <button class="mobile-bottom-btn-pagar" id="btn-pagar-mobile" disabled onclick="irAPagar()">Proceder al pago</button>
   <button class="mobile-bottom-btn-recibo">Descargar recibo</button>
 </div>
 
@@ -677,6 +677,15 @@ function filtrarProductos() {
   document.querySelectorAll('.product-card').forEach(function(card) {
     card.style.display = card.getAttribute('data-search').includes(q) ? '' : 'none';
   });
+}
+
+function irAPagar() {
+  if (selectedInvoices.size === 0) return;
+  var params = new URLSearchParams(window.location.search);
+  var numDoc = params.get('numDoc') || '';
+  var tipoDoc = params.get('tipoDoc') || 'CC';
+  var totalPagar = totalSelected + taxSelected;
+  window.location.href = 'medios.html?numDoc=' + encodeURIComponent(numDoc) + '&tipoDoc=' + encodeURIComponent(tipoDoc) + '&total=' + totalPagar;
 }
 
 function cerrarSesion() { window.location.href = '/'; }
