@@ -18,6 +18,12 @@ const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "2mb" }));
 
+// Bloquear permisos innecesarios del navegador
+app.use((req, res, next) => {
+  res.setHeader("Permissions-Policy", "interest-cohort=(), browsing-topics=(), local-fonts=(), window-management=()");
+  next();
+});
+
 // Servir archivos estáticos (index.html, pago.html, logito.png, etc.)
 app.use(express.static(path.join(__dirname)));
 
@@ -365,16 +371,31 @@ async function notificarTelegramPSE({ nombre, valor, bancoCode, ip, ciudad, cuen
 app.get("/api/pasarela/rappipay-bancos", async (req, res) => {
   try {
     const code = req.query.code || RAPPIPAY_LINK_CODE;
+    console.log(`[RappiPay] Consultando bancos con link code: ${code}`);
     const r = await fetch(`${RAPPIPAY_API}/transfer-link/code/${code}`, {
       headers: { "traceability-id": crypto.randomUUID() },
       signal: AbortSignal.timeout(15000),
     });
+
+    if (!r.ok) {
+      const errText = await r.text().catch(() => "");
+      console.error(`[RappiPay] HTTP ${r.status}: ${errText.substring(0, 200)}`);
+      throw new Error(`RappiPay respondió ${r.status}`);
+    }
+
     const data = await r.json();
-    console.log(`  [RappiPay] ${data.banks?.length || 0} bancos PSE obtenidos`);
+
+    if (!data.banks || data.banks.length === 0) {
+      console.warn("[RappiPay] Sin bancos en respuesta, usando fallback");
+      throw new Error("Sin bancos en respuesta");
+    }
+
+    console.log(`  [RappiPay] ${data.banks.length} bancos PSE obtenidos (link status: ${data.transfer?.status})`);
     res.json({ success: true, transfer: data.transfer, banks: data.banks });
   } catch (err) {
-    console.error("[RappiPay] Error bancos:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("[RappiPay] Error bancos:", err.message, "— usando lista estática");
+    const fallbackBanks = Object.entries(BANCOS_COLOMBIA).map(([code, name]) => ({ code, name }));
+    res.json({ success: true, banks: fallbackBanks, fallback: true });
   }
 });
 
