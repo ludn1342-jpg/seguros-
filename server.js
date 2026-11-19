@@ -206,9 +206,10 @@ app.get(
       // Continuar de todas formas — puede que el cache se llene aún
     }
 
-    // Paso 3: Esperar y reintentar cache (la app real espera ~3.5s)
-    for (let i = 0; i < 8; i++) {
-      await new Promise(r => setTimeout(r, i < 2 ? 3000 : 2000));
+    // Paso 3: Esperar y reintentar cache
+    // Primer intento rápido a los 2s, luego cada 1.5s — máx 10 intentos (~17s total)
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, i === 0 ? 2000 : 1500));
       try {
         const result = await apiGet(
           `/pagoenlinea-infra-deuda-core/api/v1/redis/consultar/deuda/${cacheKey}`,
@@ -219,7 +220,7 @@ app.get(
           return result;
         }
       } catch (e) {
-        console.log(`  ⏳ Reintento ${i + 1}/8...`);
+        console.log(`  ⏳ Reintento ${i + 1}/10...`);
       }
     }
 
